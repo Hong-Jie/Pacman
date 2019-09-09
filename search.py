@@ -92,31 +92,21 @@ def depthFirstSearch(problem):
 
     start = problem.getStartState();
     fringe = Stack()
-    fringe.push((start,None,0));
+    fringe.push((start,[]));
     visited = set()
-    ACT = []
-    parent = {}         # parent = {successor[0]: (action, parent[0]}
     
     while not fringe.isEmpty():
         """ Dot = (position, action, cost) """
         Dot = fringe.pop()
-        print(Dot)
         if Dot[0] not in visited:
             visited.add(Dot[0])
             if problem.isGoalState(Dot[0]):
-                trace = Dot[0]
-                while trace in parent and trace is not start:
-                    ACT.insert(0,parent[trace][0])
-                    trace = parent[trace][1]
-                return ACT
-            else:
-                for successor in problem.getSuccessors(Dot[0]):
-                    if successor[0] not in visited:
-                        fringe.push(successor)
-                        parent[successor[0]] = (successor[1], Dot[0])
+                return Dot[1]
+            for successor in problem.getSuccessors(Dot[0]):
+                if successor[0] not in visited:
+                    fringe.push((successor[0], Dot[1]+[successor[1]]))
 
-    print("No solution!")
-    return ACT
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -124,33 +114,27 @@ def breadthFirstSearch(problem):
 
     start = problem.getStartState();
     fringe = Queue()
-    fringe.push((start,None,0));
+    fringe.push((start,[],0));
     visited = set()
-    ACT = []
-    parent = {}         # parent = {successor[0]: (action, parent[0]}
     
     while not fringe.isEmpty():
         """ Dot = (position, action, cost) """
         Dot = fringe.pop()
-        visited.add(Dot[0])
-        if problem.isGoalState(Dot[0]):
-            trace = Dot[0]
-            while trace in parent and trace is not start:
-                ACT.insert(0,parent[trace][0])
-                trace = parent[trace][1]
-            return ACT
-        else:
+        if Dot[0] not in visited:
+            visited.add(Dot[0])
+            if problem.isGoalState(Dot[0]):
+                return Dot[1]
             for successor in problem.getSuccessors(Dot[0]):
                 if successor[0] not in visited:
-                    fringe.push(successor)
-                    parent[successor[0]] = (successor[1], Dot[0])
+                    fringe.push((successor[0], Dot[1]+[successor[1]], Dot[2]+successor[2]))
 
-    print("No solution!")
-    return ACT
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    from util import PriorityQueue
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
