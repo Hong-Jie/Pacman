@@ -62,18 +62,6 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-def revDir(direction):
-    if direction==Directions.NORTH:
-        return Directions.SOUTH
-    elif direction==Directions.EAST:
-        return Directions.WEST
-    elif direction==Directions.WEST:
-        return Directions.EAST
-    elif direction==Directions.SOUTH:
-        return Directions.NORTH
-    else:
-        return None
-
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -101,111 +89,64 @@ def depthFirstSearch(problem):
 
     "*** YOUR CODE HERE ***"
     from util import Stack
+
     start = problem.getStartState();
     fringe = Stack()
     fringe.push((start,None,0));
-    visited = set()     # set of viseted dots
-    ACT = []            # list of actions
-    RACT = []           # list of reverse actions
-    branchStep = []     # list of (num of branches, how many steps from branch parent)
+    visited = set()
+    ACT = []
+    parent = {}         # parent = {successor[0]: (action, parent[0]}
     
     while not fringe.isEmpty():
         """ Dot = (position, action, cost) """
         Dot = fringe.pop()
-        visited.add(Dot[0])
-        ACT.append(Dot[1])
-        RACT.append(revDir(Dot[1]))
-        if problem.isGoalState(Dot[0]):
-            ACT.pop(0)
-            return ACT
-        else:
-            numBranches = 0
-            for successor in problem.getSuccessors(Dot[0]):
-                if successor[0] not in visited:
-                    fringe.push(successor)
-                    numBranches+=1
-            if numBranches>1:
-                """ More than one path, record branches """
-                branchStep.append([numBranches, 1])
-            elif numBranches==1 and branchStep[-1]:
-                """ Only one path to forward, add steps to the current branch """
-                branchStep[-1][1]+=1
-            elif numBranches==0:
-                """ No path forward, follow reversed action to go back to branch """
-                if not branchStep[-1]:
-                    print("No solution!")
-                    return ACT
-                """ 
-                If all branches are traversed, pop out the branch record
-                and reverse steps to the branch parent 
-                """
-                reverseSteps=0
-                while branchStep[-1][0]==1:
-                    reverseSteps += branchStep[-1][1]
-                    branchStep.pop()
-                
-                reverseSteps += branchStep[-1][1]
-                branchStep[-1][0]-=1        # Decrease number of branches
-                branchStep[-1][1]=1         # Initialize steps from branch parent to 1
-                for x in range(reverseSteps):
-                    ACT.append(RACT.pop())
-    
+        print(Dot)
+        if Dot[0] not in visited:
+            visited.add(Dot[0])
+            if problem.isGoalState(Dot[0]):
+                trace = Dot[0]
+                while trace in parent and trace is not start:
+                    ACT.insert(0,parent[trace][0])
+                    trace = parent[trace][1]
+                return ACT
+            else:
+                for successor in problem.getSuccessors(Dot[0]):
+                    if successor[0] not in visited:
+                        fringe.push(successor)
+                        parent[successor[0]] = (successor[1], Dot[0])
+
     print("No solution!")
     return ACT
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     from util import Queue 
+
     start = problem.getStartState();
     fringe = Queue()
     fringe.push((start,None,0));
-    visited = set()     # set of viseted dots
-    ACT = []            # list of actions
-    RACT = []           # list of reverse actions
-    branchStep = []     # list of (num of branches, how many steps from branch parent)
+    visited = set()
+    ACT = []
+    parent = {}         # parent = {successor[0]: (action, parent[0]}
     
     while not fringe.isEmpty():
         """ Dot = (position, action, cost) """
         Dot = fringe.pop()
         visited.add(Dot[0])
-        ACT.append(Dot[1])
-        RACT.append(revDir(Dot[1]))
         if problem.isGoalState(Dot[0]):
-            ACT.pop(0)
+            trace = Dot[0]
+            while trace in parent and trace is not start:
+                ACT.insert(0,parent[trace][0])
+                trace = parent[trace][1]
             return ACT
         else:
-            numBranches = 0
             for successor in problem.getSuccessors(Dot[0]):
                 if successor[0] not in visited:
                     fringe.push(successor)
-                    numBranches+=1
-            if numBranches>1:
-                """ More than one path, record branches """
-                branchStep.append([numBranches, 1])
-            elif numBranches==1 and branchStep[-1]:
-                """ Only one path to forward, add steps to the current branch """
-                branchStep[-1][1]+=1
-            elif numBranches==0:
-                """ No path forward, follow reversed action to go back to branch """
-                if not branchStep[-1]:
-                    print("No solution!")
-                    return ACT
-                """ 
-                If all branches are traversed, pop out the branch record
-                and reverse steps to the branch parent 
-                """
-                reverseSteps=0
-                while branchStep[-1][0]==1:
-                    reverseSteps += branchStep[-1][1]
-                    branchStep.pop()
-                
-                reverseSteps += branchStep[-1][1]
-                branchStep[-1][0]-=1        # Decrease number of branches
-                branchStep[-1][1]=1         # Initialize steps from branch parent to 1
-                for x in range(reverseSteps):
-                    ACT.append(RACT.pop())
-    
+                    parent[successor[0]] = (successor[1], Dot[0])
+
     print("No solution!")
+    return ACT
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
