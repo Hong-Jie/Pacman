@@ -363,7 +363,6 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     from copy import deepcopy
     x, y = state[0]
-    minManhattan = sum([i for (i,j) in problem.corners])+sum([j for (i,j) in problem.corners])
     cornersLeft = deepcopy(state[1])
     manhattan = 0
     while cornersLeft:
@@ -466,7 +465,26 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    from copy import deepcopy
+    x, y = position
+    foodLeft = foodGrid.asList()
+    if len(foodLeft) <= 0:
+        return 0
+
+    minFoodD, minFood = min((x+y, (x,y)) for x, y in foodLeft)
+    maxFoodD, maxFood = max((x+y, (x,y)) for x, y in foodLeft)
+
+    manhattan = min( mazeDistance(position, minFood, problem.startingGameState), \
+            mazeDistance(position, maxFood, problem.startingGameState) ) \
+            + mazeDistance(minFood, maxFood, problem.startingGameState)
+
+    # while foodLeft:
+    #     minD, food = min([(abs(x-foodX)+abs(y-foodY), (foodX, foodY)) for foodX, foodY in foodLeft])
+    #     manhattan += minD
+    #     x, y = food
+    #     foodLeft.remove(food)
+
+    return manhattan
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -497,7 +515,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -531,9 +549,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if state in self.food.asList():
+            return True
+        else:
+            return False
 
 def mazeDistance(point1, point2, gameState):
     """
