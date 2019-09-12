@@ -82,30 +82,26 @@ def depthFirstSearch(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
     """
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-
     "*** YOUR CODE HERE ***"
     from util import Stack
 
     start = problem.getStartState();
     fringe = Stack()
-    fringe.push((start,[]));
-    visited = set()
+    fringe.push((start, []))
+    visited = []
     
     while not fringe.isEmpty():
-        """ Dot = (position, action, cost) """
-        Dot = fringe.pop()
-        if Dot[0] not in visited:
-            visited.add(Dot[0])
-            if problem.isGoalState(Dot[0]):
-                return Dot[1]
-            for successor in problem.getSuccessors(Dot[0]):
-                if successor[0] not in visited:
-                    fringe.push((successor[0], Dot[1]+[successor[1]]))
+        node, actions = fringe.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return actions
+            for successor in problem.getSuccessors(node):
+                coordinate, direction, cost = successor
+                if coordinate not in visited:
+                    fringe.push((coordinate, actions+[direction]))
 
+    print("No solution!")
     return []
 
 def breadthFirstSearch(problem):
@@ -114,28 +110,50 @@ def breadthFirstSearch(problem):
 
     start = problem.getStartState();
     fringe = Queue()
-    fringe.push((start,[],0));
-    visited = set()
+    fringe.push((start, []))
+    visited = []
     
     while not fringe.isEmpty():
-        """ Dot = (position, action, cost) """
-        Dot = fringe.pop()
-        if Dot[0] not in visited:
-            visited.add(Dot[0])
-            if problem.isGoalState(Dot[0]):
-                return Dot[1]
-            for successor in problem.getSuccessors(Dot[0]):
-                if successor[0] not in visited:
-                    fringe.push((successor[0], Dot[1]+[successor[1]], Dot[2]+successor[2]))
+        node, actions = fringe.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return actions 
+            for successor in problem.getSuccessors(node):
+                coordinate, direction, cost = successor
+                if coordinate not in visited:
+                    fringe.push((coordinate, actions+[direction]))
 
+    print("No solution!")
     return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    from util import PriorityQueue
+    # print("Start:", problem.getStartState())
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    from util import PriorityQueue 
 
-    util.raiseNotDefined()
+    start = problem.getStartState();
+    fringe = PriorityQueue()
+    fringe.push((start, [], 0), 0);
+    visited = []
+    
+    while not fringe.isEmpty():
+        node, actions, cost = fringe.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return actions 
+            for successor in problem.getSuccessors(node):
+                coordinate, direction, addCost = successor
+                if coordinate not in visited:
+                    cumCost = cost + addCost
+                    fringe.push((coordinate, actions+[direction], cumCost), cumCost)
+
+    print("No solution!")
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -147,7 +165,28 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue 
+
+    start = problem.getStartState();
+    fringe = PriorityQueue()
+    fringe.push((start, [], 0), 0);
+    visited = []
+    
+    while not fringe.isEmpty():
+        node, actions, cost = fringe.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return actions 
+            for successor in problem.getSuccessors(node):
+                coordinate, direction, addCost = successor
+                if coordinate not in visited:
+                    cumCost = cost + addCost
+                    heu = heuristic(coordinate, problem)
+                    fringe.push((coordinate, actions+[direction], cumCost), cumCost+heu)
+
+    print("No solution!")
+    return []
 
 
 # Abbreviations
